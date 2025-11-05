@@ -23,8 +23,7 @@ public class RigidFragment : MonoBehaviour
     public float restitution = 0.1f; // bounciness on contact
     public float friction = 0.4f;    // simple surface friction applied on contact
 
-    // Cached floor collider for simple ground collision detection
-    private BoxCollider cachedFloorCollider = null;
+    // We no longer use Unity Colliders for ground detection. Use FloorInfo data computed at runtime.
     
     // Matrice de transformation custom
     private Matrix4x4Custom transformMatrix = new Matrix4x4Custom();
@@ -53,21 +52,17 @@ public class RigidFragment : MonoBehaviour
         // Predict next position
         Vector3 nextPosition = currentPosition + velocity * dt;
 
-        // Ensure we have a cached reference to the floor collider
-        if (cachedFloorCollider == null)
+        // Ground collision test (simple) using FloorInfo instead of BoxCollider
+        float floorTop = float.NegativeInfinity;
+        var floorObj = GameObject.Find("Floor");
+        if (floorObj != null)
         {
-            var floorObj = GameObject.Find("Floor");
-            if (floorObj != null)
-            {
-                cachedFloorCollider = floorObj.GetComponent<BoxCollider>();
-            }
+            var fi = floorObj.GetComponent<FloorInfo>();
+            if (fi != null) floorTop = fi.TopY;
         }
 
-        // Ground collision test (simple): clamp y so fragment does not penetrate the floor
-        if (cachedFloorCollider != null)
+        if (!float.IsNegativeInfinity(floorTop))
         {
-            float floorTop = cachedFloorCollider.bounds.max.y;
-
             // Estimate half-height of this fragment in world units using mesh bounds
             float halfHeight = 0.5f;
             var mf = GetComponent<MeshFilter>();

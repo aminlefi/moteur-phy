@@ -111,54 +111,52 @@ public class FractureSystem : MonoBehaviour
         // Utiliser notre générateur de mesh CUSTOM (pas de primitives Unity!)
         Vector3 adjustedSize = size * 0.95f; // Légèrement plus petit pour voir les gaps
         
-        GameObject cube = MeshGenerator.CreateCubeGameObject(position, adjustedSize, fragmentMaterial);
+    GameObject cube = MeshGenerator.CreateCubeGameObject(position, adjustedSize, fragmentMaterial);
+    // Hide runtime fragment GameObjects from the Hierarchy so they don't clutter the Editor view
+    // They remain active and the components still run, but will not appear in the Hierarchy window.
+    cube.hideFlags = HideFlags.HideInHierarchy;
         // Ensure renderer has a valid material. If the provided fragmentMaterial is null or uses an incompatible shader
         // the mesh can appear magenta. Assign a safe fallback material if needed.
         var mr = cube.GetComponent<MeshRenderer>();
         if (mr != null)
         {
-            if (fragmentMaterial != null)
+            // Prefer explicit fragmentMaterial if provided and its shader appears available.
+            if (fragmentMaterial != null && fragmentMaterial.shader != null && Shader.Find(fragmentMaterial.shader.name) != null)
             {
                 mr.material = fragmentMaterial;
             }
             else
             {
+                // Robust fallback order: common safe shaders
                 string[] candidates = new string[] {
+                    "Sprites/Default",
                     "Unlit/Color",
                     "Universal Render Pipeline/Unlit",
                     "Universal Render Pipeline/Lit",
                     "HDRP/Lit",
                     "Standard",
-                    "Sprites/Default",
-                    "Unlit/Texture",
                     "Legacy Shaders/Diffuse"
                 };
 
-                Shader found = null;
+                Shader chosen = null;
                 foreach (var name in candidates)
                 {
-                    found = Shader.Find(name);
-                    if (found != null) break;
+                    chosen = Shader.Find(name);
+                    if (chosen != null) break;
                 }
 
-                if (found != null)
+                if (chosen != null)
                 {
-                    Material fallback = new Material(found);
+                    Material fallback = new Material(chosen);
                     if (fallback.HasProperty("_Color")) fallback.color = Color.grey;
                     mr.material = fallback;
                 }
                 else
                 {
-                    Shader s2 = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Color");
-                    if (s2 != null)
-                    {
-                        mr.material = new Material(s2);
-                        if (mr.material.HasProperty("_Color")) mr.material.color = Color.grey;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No suitable shader found for fragment material; fragments may render magenta. If you're using URP/HDRP ensure the correct pipeline shaders are available.");
-                    }
+                    // Final fallback: create a default material without a shader (rare)
+                    mr.material = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Color"));
+                    if (mr.material != null && mr.material.HasProperty("_Color")) mr.material.color = Color.grey;
+                    Debug.LogWarning("No suitable shader found for fragment material; fragments may render magenta. If you're using URP/HDRP ensure the correct pipeline shaders are available.");
                 }
             }
 
@@ -236,13 +234,13 @@ public class FractureSystem : MonoBehaviour
             bool allowBreak = true;
             if (requireGroundContact)
             {
-                // Use the actual floor collider top if available, otherwise fall back to groundY
+                // Use the actual floor top from FloorInfo if available, otherwise fall back to groundY
                 float floorTop = groundY;
                 GameObject floorObj = GameObject.Find("Floor");
                 if (floorObj != null)
                 {
-                    var fc = floorObj.GetComponent<BoxCollider>();
-                    if (fc != null) floorTop = fc.bounds.max.y;
+                    var fi = floorObj.GetComponent<FloorInfo>();
+                    if (fi != null) floorTop = fi.TopY;
                 }
 
                 // Compute fragment bottom (center.y - halfHeight) using mesh bounds where possible

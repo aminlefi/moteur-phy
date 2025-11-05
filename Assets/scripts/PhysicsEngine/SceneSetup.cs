@@ -70,6 +70,8 @@ public class SceneSetup : MonoBehaviour
         );
         
         mainCube.name = "Fracturable Cube";
+    // Hide the main cube GameObject from the Hierarchy to keep the Editor clean.
+    mainCube.hideFlags = HideFlags.HideInHierarchy;
         
         // Ajouter FractureSystem
         FractureSystem fractureSystem = mainCube.AddComponent<FractureSystem>();
@@ -137,33 +139,38 @@ public class SceneSetup : MonoBehaviour
                 CreateFloorMaterial()
             );
             floor.name = "Floor";
+            // Hide the floor GameObject from the Hierarchy so it doesn't clutter the Editor.
+            floor.hideFlags = HideFlags.HideInHierarchy;
         }
-        // Ensure it has a BoxCollider so physics fragments collide with it
-        var bc = floor.GetComponent<BoxCollider>();
-        if (bc == null) bc = floor.AddComponent<BoxCollider>();
-
-        // Try to size the collider to the mesh bounds created by MeshGenerator.
+        // Instead of using a Unity Collider, attach a FloorInfo component and compute world bounds from the mesh.
         var mf2 = floor.GetComponent<MeshFilter>();
         if (mf2 != null && mf2.mesh != null)
         {
-            // Mesh bounds are in local space; use them to size the collider so it matches the visible mesh
-            bc.size = mf2.mesh.bounds.size;
-            bc.center = mf2.mesh.bounds.center;
-            Debug.LogFormat("[CreateFloor] Mesh bounds size={0}, center={1}", mf2.mesh.bounds.size, mf2.mesh.bounds.center);
+            // Ensure transform scale is identity so mesh bounds map predictably
+            floor.transform.localScale = Vector3.one;
+
+            // Add or update FloorInfo component used by our custom physics
+            var fi = floor.GetComponent<FloorInfo>();
+            if (fi == null) fi = floor.AddComponent<FloorInfo>();
+            fi.UpdateFromMesh(mf2);
+
+            Debug.LogFormat("[CreateFloor] Mesh bounds size={0}, center={1}, worldTopY={2}", mf2.mesh.bounds.size, mf2.mesh.bounds.center, fi.TopY);
         }
         else
         {
-            // Fallback: set collider to the forced large size
-            bc.size = new Vector3(1000f, 0.1f, 1000f);
-            bc.center = Vector3.zero;
-            Debug.LogWarning("[CreateFloor] MeshFilter or mesh missing when sizing collider; using forced fallback size.");
+            // Fallback: ensure transform scale is identity and still create FloorInfo with approximate values
+            floor.transform.localScale = Vector3.one;
+            var fi = floor.GetComponent<FloorInfo>();
+            if (fi == null) fi = floor.AddComponent<FloorInfo>();
+            fi.worldCenter = floor.transform.position;
+            fi.worldSize = new Vector3(1000f, 0.1f, 1000f);
+            Debug.LogWarning("[CreateFloor] MeshFilter or mesh missing when sizing floor info; using fallback size.");
         }
 
-        // Ensure transform scale is identity so collider size maps correctly
-        floor.transform.localScale = Vector3.one;
-
-        // Mark static so Unity treats it as environment (optimization)
-        floor.isStatic = true;
+    // Mark static so Unity treats it as environment (optimization)
+    floor.isStatic = true;
+    // Ensure the floor remains hidden in the Hierarchy when using an existing object
+    floor.hideFlags = HideFlags.HideInHierarchy;
     }
     
     void SetupLighting()
@@ -180,26 +187,39 @@ public class SceneSetup : MonoBehaviour
     
     Material CreateDefaultMaterial()
     {
-        Material mat = new Material(Shader.Find("Standard"));
-        mat.color = new Color(0.8f, 0.3f, 0.3f); // Rouge-orangé
+        Shader s = FindUsableShader(new string[] { "Sprites/Default", "Unlit/Color", "Standard", "Universal Render Pipeline/Lit" });
+        Material mat = new Material(s ?? Shader.Find("Standard"));
+        if (mat.HasProperty("_Color")) mat.color = new Color(0.8f, 0.3f, 0.3f); // Rouge-orangé
         return mat;
     }
     
     Material CreateFragmentMaterial()
     {
-        Material mat = new Material(Shader.Find("Standard"));
-        mat.color = new Color(0.7f, 0.4f, 0.2f); // Orange
-        mat.SetFloat("_Metallic", 0.2f);
-        mat.SetFloat("_Glossiness", 0.5f);
+        Shader s = FindUsableShader(new string[] { "Sprites/Default", "Unlit/Color", "Standard", "Universal Render Pipeline/Lit" });
+        Material mat = new Material(s ?? Shader.Find("Standard"));
+        if (mat.HasProperty("_Color")) mat.color = new Color(0.7f, 0.4f, 0.2f); // Orange
+        if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0.2f);
+        if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.5f);
         return mat;
     }
     
     Material CreateFloorMaterial()
     {
-        Material mat = new Material(Shader.Find("Standard"));
-        mat.color = new Color(0.3f, 0.3f, 0.3f); // Gris
-        mat.SetFloat("_Metallic", 0.1f);
-        mat.SetFloat("_Glossiness", 0.3f);
+        Shader s = FindUsableShader(new string[] { "Sprites/Default", "Unlit/Color", "Standard", "Universal Render Pipeline/Lit" });
+        Material mat = new Material(s ?? Shader.Find("Standard"));
+        if (mat.HasProperty("_Color")) mat.color = new Color(0.3f, 0.3f, 0.3f); // Gris
+        if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0.1f);
+        if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", 0.3f);
         return mat;
+    }
+
+    Shader FindUsableShader(string[] candidates)
+    {
+        foreach (var name in candidates)
+        {
+            var sh = Shader.Find(name);
+            if (sh != null) return sh;
+        }
+        return null;
     }
 }
