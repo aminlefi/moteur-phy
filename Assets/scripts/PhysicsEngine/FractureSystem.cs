@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+using UnityEngine;
+using System.Collections.Generic;
+
 /// <summary>
 /// Système de pré-fracture - découpe un cube en fragments
 /// </summary>
@@ -210,12 +213,12 @@ public class FractureSystem : MonoBehaviour
     {
         // Vérifier rupture des contraintes but only apply impulses once per fragment and optionally only when
         // fragments are in contact with the ground.
-    var toRemove = new List<SpringConstraint>();
-    // Accumulate impulses and weighted application points per fragment so we can apply
-    // the net impulse at a meaningful contact location (helps fragments separate).
-    var pendingImpulses = new System.Collections.Generic.Dictionary<RigidFragment, Vector3>();
-    var pendingPointWeightedSum = new System.Collections.Generic.Dictionary<RigidFragment, Vector3>();
-    var pendingPointWeight = new System.Collections.Generic.Dictionary<RigidFragment, float>();
+            var toRemove = new List<SpringConstraint>();
+            // Accumulate impulses and weighted application points per fragment so we can apply
+            // the net impulse at a meaningful contact location (helps fragments separate).
+            var pendingImpulses = new Dictionary<RigidFragment, Vector3>();
+            var pendingPointWeightedSum = new Dictionary<RigidFragment, Vector3>();
+            var pendingPointWeight = new Dictionary<RigidFragment, float>();
 
         for (int i = 0; i < constraints.Count; i++)
         {
