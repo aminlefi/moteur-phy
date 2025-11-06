@@ -47,11 +47,31 @@ public class RigidFragment : MonoBehaviour
     void OnDisable()
     {
         Debug.LogFormat("[RigidFragment] OnDisable called for {0} at pos={1}", gameObject.name, transform.position);
+        // Capture a stack trace to help locate who/what disabled this GameObject/component
+        try
+        {
+            string trace = System.Environment.StackTrace;
+            Debug.LogFormat("[RigidFragment] OnDisable stacktrace for {0}:\n{1}", gameObject.name, trace);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarningFormat("[RigidFragment] Failed to capture stacktrace on OnDisable: {0}", ex.Message);
+        }
     }
 
     void OnDestroy()
     {
         Debug.LogFormat("[RigidFragment] OnDestroy called for {0}", gameObject.name);
+        // Capture a stack trace at destruction time - useful to find which code path called Destroy()
+        try
+        {
+            string trace = System.Environment.StackTrace;
+            Debug.LogFormat("[RigidFragment] OnDestroy stacktrace for {0}:\n{1}", gameObject.name, trace);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarningFormat("[RigidFragment] Failed to capture stacktrace on OnDestroy: {0}", ex.Message);
+        }
     }
 
     void OnBecameVisible()

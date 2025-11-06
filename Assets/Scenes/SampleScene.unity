@@ -205,13 +205,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.011505208, y: 0.852679, z: 0.018978033, w: 0.52196354}
+  m_LocalPosition: {x: -21.677492, y: 0.19457841, z: 10.882915}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 13.708, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,7 +458,7 @@ MonoBehaviour:
   autoSetup: 1
   cubePosition: {x: 0, y: 5, z: 0}
   cubeSize: {x: 2, y: 2, z: 2}
-  cameraPosition: {x: 0, y: 3, z: -10}
+  cameraPosition: {x: -21.67749, y: 0.1945784, z: 10.88291}
   cameraLookAt: {x: 0, y: 3, z: 0}
   createFloor: 1
   floorPosition: {x: 0, y: 0, z: 0}
