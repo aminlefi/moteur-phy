@@ -160,6 +160,20 @@ public class FractureSystem : MonoBehaviour
                 }
             }
 
+            // Try to disable backface culling on the fragment material so faces are visible from both sides.
+            try
+            {
+                if (mr.material != null)
+                {
+                    mr.material.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
+                    mr.material.doubleSidedGI = true;
+                }
+            }
+            catch (System.Exception)
+            {
+                // Some shaders don't expose _Cull; ignore failures silently.
+            }
+
             mr.enabled = true;
         }
 

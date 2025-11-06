@@ -103,6 +103,8 @@ public class SceneSetup : MonoBehaviour
         cam.transform.LookAt(cameraLookAt);
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(0.2f, 0.3f, 0.4f);
+    // Disable Unity occlusion culling for this demo so our custom renderer bounds are not used to hide fragments
+    cam.useOcclusionCulling = false;
     }
     
     void CreateFloor()

@@ -44,6 +44,32 @@ public class RigidFragment : MonoBehaviour
         CalculateInertia();
     }
 
+    void OnDisable()
+    {
+        Debug.LogFormat("[RigidFragment] OnDisable called for {0} at pos={1}", gameObject.name, transform.position);
+    }
+
+    void OnDestroy()
+    {
+        Debug.LogFormat("[RigidFragment] OnDestroy called for {0}", gameObject.name);
+    }
+
+    void OnBecameVisible()
+    {
+        var r = GetComponent<Renderer>();
+        Camera cam = Camera.main;
+        float dist = cam != null ? Vector3.Distance(cam.transform.position, transform.position) : 0f;
+        Debug.LogFormat("[RigidFragment] OnBecameVisible {0} bounds={1} distToCam={2}", gameObject.name, r != null ? r.bounds.ToString() : "no renderer", dist);
+    }
+
+    void OnBecameInvisible()
+    {
+        var r = GetComponent<Renderer>();
+        Camera cam = Camera.main;
+        float dist = cam != null ? Vector3.Distance(cam.transform.position, transform.position) : 0f;
+        Debug.LogFormat("[RigidFragment] OnBecameInvisible {0} bounds={1} distToCam={2}", gameObject.name, r != null ? r.bounds.ToString() : "no renderer", dist);
+    }
+
     void FixedUpdate()
     {
         // Intégration manuelle (Euler explicite) with simple ground collision handling
@@ -92,6 +118,29 @@ public class RigidFragment : MonoBehaviour
         // Commit next position and rotation
         currentPosition = nextPosition;
         currentRotation += angularVelocity * dt;
+
+        // Diagnostics: detect NaN/Inf/large positions or zero scale that could make the mesh invisible
+        if (float.IsNaN(currentPosition.x) || float.IsNaN(currentPosition.y) || float.IsNaN(currentPosition.z) ||
+            float.IsInfinity(currentPosition.x) || float.IsInfinity(currentPosition.y) || float.IsInfinity(currentPosition.z))
+        {
+            Debug.LogErrorFormat("[RigidFragment] {0} has invalid position (NaN/Inf): {1}", gameObject.name, currentPosition);
+        }
+
+        if (currentPosition.magnitude > 1e4f)
+        {
+            Debug.LogWarningFormat("[RigidFragment] {0} moved very far away: {1}", gameObject.name, currentPosition);
+        }
+
+        var mrCheck = GetComponent<MeshRenderer>();
+        var mfCheck = GetComponent<MeshFilter>();
+        if (mrCheck == null || mfCheck == null || mfCheck.mesh == null)
+        {
+            Debug.LogWarningFormat("[RigidFragment] {0} missing renderer/filter/mesh - mr={1} mf={2} mesh={3}", gameObject.name, mrCheck != null, mfCheck != null, mfCheck != null ? mfCheck.mesh != null : false);
+        }
+        else if (!mrCheck.enabled)
+        {
+            Debug.LogFormat("[RigidFragment] {0} MeshRenderer.enabled == false", gameObject.name);
+        }
 
         // Apply simple exponential damping to avoid runaway velocities
         if (linearDamping > 0f)
@@ -238,6 +287,17 @@ public class RigidFragment : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(currentPosition + centerOfMass, 0.05f);
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying) return;
+        var r = GetComponent<Renderer>();
+        if (r != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(r.bounds.center, r.bounds.size);
         }
     }
 
