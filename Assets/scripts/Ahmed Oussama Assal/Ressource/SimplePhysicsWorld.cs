@@ -9,10 +9,12 @@ public class SimplePhysicsWorld : MonoBehaviour
  public bool resolvePenetration = true;
  public Color contactColor = Color.red;
  public Vector3 gravity = new Vector3(0,-9.81f,0);
+ [Range(1,16)] public int substeps =4; // for stability and high-speed interactions
 
  readonly List<SimpleAABBCollider> _colliders = new();
  readonly List<(SimpleAABBCollider, SimpleAABBCollider)> _contacts = new();
  readonly List<SimpleBody> _bodies = new();
+ readonly List<SimpleSpringConstraint> _constraints = new();
 
  void Start()
  {
@@ -26,6 +28,8 @@ public class SimplePhysicsWorld : MonoBehaviour
  _colliders.AddRange(FindObjectsOfType<SimpleAABBCollider>());
  _bodies.Clear();
  _bodies.AddRange(FindObjectsOfType<SimpleBody>());
+ _constraints.Clear();
+ _constraints.AddRange(FindObjectsOfType<SimpleSpringConstraint>());
  }
 
  public void Register(SimpleAABBCollider col)
@@ -33,6 +37,8 @@ public class SimplePhysicsWorld : MonoBehaviour
  public void Unregister(SimpleAABBCollider col){ _colliders.Remove(col); }
  public void Register(SimpleBody body){ if (!_bodies.Contains(body)) _bodies.Add(body); }
  public void Unregister(SimpleBody body){ _bodies.Remove(body); }
+ public void Register(SimpleSpringConstraint c){ if (!_constraints.Contains(c)) _constraints.Add(c); }
+ public void Unregister(SimpleSpringConstraint c){ _constraints.Remove(c); }
 
  void Update()
  {
@@ -40,26 +46,18 @@ public class SimplePhysicsWorld : MonoBehaviour
  {
  var allC = FindObjectsOfType<SimpleAABBCollider>(); foreach (var c in allC) if (!_colliders.Contains(c)) _colliders.Add(c);
  var allB = FindObjectsOfType<SimpleBody>(); foreach (var b in allB) if (!_bodies.Contains(b)) _bodies.Add(b);
+ var allCons = FindObjectsOfType<SimpleSpringConstraint>(); foreach (var c in allCons) if (!_constraints.Contains(c)) _constraints.Add(c);
  }
 
  float dt = Time.deltaTime;
- Integrate(dt);
+ float h = dt / Mathf.Max(1, substeps);
 
  _contacts.Clear();
- int n = _colliders.Count;
- for (int i =0; i < n -1; i++)
+ for (int step =0; step < Mathf.Max(1, substeps); step++)
  {
- var a = _colliders[i]; if (!a) continue;
- for (int j = i +1; j < n; j++)
- {
- var b = _colliders[j]; if (!b) continue;
- if (a.Overlaps(b))
- {
- _contacts.Add((a,b));
- if (resolvePenetration)
- Resolve(a,b);
- }
- }
+ Integrate(h);
+ StepConstraints(h);
+ CollideAndResolve();
  }
  }
 
@@ -80,6 +78,34 @@ public class SimplePhysicsWorld : MonoBehaviour
  // integrate
  body.customTransform.Translate(body.velocity * dt);
  body.customTransform.MarkDirty();
+ }
+ }
+
+ void StepConstraints(float dt)
+ {
+ for (int i =0; i < _constraints.Count; i++)
+ {
+ var c = _constraints[i]; if (!c) continue;
+ c.Step(dt);
+ }
+ }
+
+ void CollideAndResolve()
+ {
+ int n = _colliders.Count;
+ for (int i =0; i < n -1; i++)
+ {
+ var a = _colliders[i]; if (!a) continue;
+ for (int j = i +1; j < n; j++)
+ {
+ var b = _colliders[j]; if (!b) continue;
+ if (a.Overlaps(b))
+ {
+ _contacts.Add((a,b));
+ if (resolvePenetration)
+ Resolve(a,b);
+ }
+ }
  }
  }
 

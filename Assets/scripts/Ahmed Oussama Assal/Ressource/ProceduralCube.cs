@@ -3,10 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(CustomTransform))]
 public class ProceduralCube : MonoBehaviour
 {
-    public Vector3 size = Vector3.one;
+    // Deprecated: size is no longer used. Geometry is a unit cube; scaling comes from CustomTransform.scale
+    [System.Obsolete("Use CustomTransform.scale instead of ProceduralCube.size")] public Vector3 size = Vector3.one;
     public Material material; // base material (will be instantiated per-cube at runtime)
     public UnityEngine.Color color = default; // editable in inspector
-    public Vector3 HalfSize => size *0.5f;
+    public Vector3 HalfSize => Vector3.one *0.5f; // unit cube half-size; world size comes from CustomTransform.scale
     private CustomTransform _ct;
     private Mesh _mesh;
     private Vector3[] _baseVertices;
@@ -42,7 +43,8 @@ public class ProceduralCube : MonoBehaviour
 
     void Build()
     {
-        float hx = size.x *0.5f, hy = size.y *0.5f, hz = size.z *0.5f;
+        // Build a unit cube in local space (-0.5..0.5); scaling is applied via CustomTransform.scale
+        float hx =0.5f, hy =0.5f, hz =0.5f;
         _baseVertices = new Vector3[]
         {
             new Vector3(-hx, -hy, hz), new Vector3( hx, -hy, hz), new Vector3( hx, hy, hz), new Vector3(-hx, hy, hz),
