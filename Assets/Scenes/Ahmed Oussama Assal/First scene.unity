@@ -443,6 +443,10 @@ PrefabInstance:
       propertyPath: damping
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6577210402938837836, guid: a2e3de9091c15e243b367485ac2de937, type: 3}
+      propertyPath: angularDamping
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6845075089206434788, guid: a2e3de9091c15e243b367485ac2de937, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -708,6 +712,10 @@ PrefabInstance:
     - target: {fileID: 6577210402938837836, guid: a2e3de9091c15e243b367485ac2de937, type: 3}
       propertyPath: damping
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6577210402938837836, guid: a2e3de9091c15e243b367485ac2de937, type: 3}
+      propertyPath: angularDamping
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6845075089206434788, guid: a2e3de9091c15e243b367485ac2de937, type: 3}
       propertyPath: m_LocalPosition.x
