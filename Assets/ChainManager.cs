@@ -88,33 +88,51 @@ public class GestionnaireDeChaine : MonoBehaviour
         int SousEtapes = NombreDeSousEtapesParImage;
         float Δt = PasDeSousEtape;
 
+        // ----- BOUCLE DE SOUS-INTÉGRATION (intégration plus stable) -----
         for (int s = 0; s < SousEtapes; s++)
         {
+            // ---- 1) FIXER LE POINT D’ANCRAGE SUPÉRIEUR ----
             Points[0].Position = PositionAncrageSuperieur;
             Points[0].Vitesse = Vector2.zero;
 
+            // ---- 2) SI LA CHAÎNE N’EST PAS ENCORE LIBÉRÉE, MAINTENIR LE POINT INFÉRIEUR ----
             if (!EstLiberee)
             {
                 Points[NombreDePoints - 1].Position = PositionAncrageInferieur;
                 Points[NombreDePoints - 1].Vitesse = Vector2.zero;
 
+                // ---- 3) LIBÉRATION APRÈS LE TEMPS DONNÉ + IMPULSION INITIALE ----
                 if (Time.time > TempsDeLiberation)
                 {
                     EstLiberee = true;
+
+                    // petite translation vers le bas pour créer un étirement
                     Points[NombreDePoints - 1].Position += new Vector2(0, -LongueurDeRepos * 0.25f);
+
+                    // vitesse initiale vers le bas au moment de la libération
                     Points[NombreDePoints - 1].Vitesse = new Vector2(0, -25f);
+
+                    // rupture de la dernière liaison -> génération du "snap"
                     RompreDerniereLiaison();
                 }
             }
 
+            // ----- 4) INTÉGRATION DES LOIS DE NEWTON POUR CHAQUE POINT -----
             for (int i = 0; i < NombreDePoints; i++)
             {
                 if (Points[i].EstFixe) continue;
+
+                // 4.1 - Appliquer la gravité (mécanique du point matériel)
                 Points[i].Vitesse += AccelerationGravitationnelle * Δt;
+
+                // 4.2 - Appliquer le frottement de l’air (amortissement global)
                 Points[i].Vitesse *= (1f - CoefficientDeFrottementDeLAir * Δt);
+
+                // 4.3 - Mettre à jour la position (intégration d’Euler)
                 Points[i].Position += Points[i].Vitesse * Δt;
             }
 
+            // ----- 5) BOUCLE DE SATISFACTION DES CONTRAINTES (itérations Gauss–Seidel) -----
             for (int it = 0; it < NombreDIterationsDeContrainte; it++)
             {
                 for (int e = 0; e < Liaisons.Count; e++)
@@ -122,34 +140,62 @@ public class GestionnaireDeChaine : MonoBehaviour
                     LiaisonMecanique L = Liaisons[e];
                     if (L.EstRompue) continue;
 
+                    // indices des deux points reliés
                     int i = L.IndexA, j = L.IndexB;
+
+                    // positions actuelles
                     Vector2 PositionA = Points[i].Position;
                     Vector2 PositionB = Points[j].Position;
+
+                    // vecteur reliant les deux points
                     Vector2 Direction = PositionB - PositionA;
                     float Distance = Direction.magnitude;
+
+                    // éviter division par zéro
                     if (Distance < 1e-6f) continue;
+
+                    // vecteur normalisé (direction du ressort)
                     Vector2 DirectionNormale = Direction / Distance;
 
+                    // ---- 5.1 - CALCUL DE L’ERREUR DE CONTRAINTE ----
                     float Erreur = Distance - L.LongueurDeRepos;
+
+                    // masses inverses (si fixé → 0)
                     float InverseMasseA = Points[i].EstFixe ? 0f : 1f / Points[i].Masse;
                     float InverseMasseB = Points[j].EstFixe ? 0f : 1f / Points[j].Masse;
+
                     float SommeInverses = InverseMasseA + InverseMasseB;
                     if (SommeInverses <= 0f) continue;
 
+                    // ---- 5.2 - CALCUL DE LA CORRECTION POUR RÉTABLIR LA LONGUEUR ----
                     Vector2 Correction = (Erreur / SommeInverses) * DirectionNormale;
+
                     const float FacteurDeRelaxation = 0.85f;
+
+                    // appliquer correction pondérée aux positions
                     if (!Points[i].EstFixe) Points[i].Position += Correction * InverseMasseA * FacteurDeRelaxation;
                     if (!Points[j].EstFixe) Points[j].Position -= Correction * InverseMasseB * FacteurDeRelaxation;
 
+                    // ---- 5.3 - AMORTISSEMENT DE LA VITESSE RELATIVE (amortissement interne du ressort) ----
                     Vector2 VitesseRelative = Points[j].Vitesse - Points[i].Vitesse;
+
+                    // composante normale de la vitesse relative (alignée avec la liaison)
                     float ComposanteNormaleVitesse = Vector2.Dot(VitesseRelative, DirectionNormale);
+
+                    // impulsion amortie → dissiper une partie de l’énergie interne
                     float ImpulsionAmortie = L.CoefficientDAmortissement * ComposanteNormaleVitesse * 0.5f;
-                    if (!Points[i].EstFixe) Points[i].Vitesse += (ImpulsionAmortie * DirectionNormale) * (InverseMasseA / SommeInverses);
-                    if (!Points[j].EstFixe) Points[j].Vitesse -= (ImpulsionAmortie * DirectionNormale) * (InverseMasseB / SommeInverses);
+
+                    // application pondérée aux vitesses
+                    if (!Points[i].EstFixe)
+                        Points[i].Vitesse += (ImpulsionAmortie * DirectionNormale) * (InverseMasseA / SommeInverses);
+
+                    if (!Points[j].EstFixe)
+                        Points[j].Vitesse -= (ImpulsionAmortie * DirectionNormale) * (InverseMasseB / SommeInverses);
                 }
             }
         }
     }
+
 
     void RompreDerniereLiaison()
     {
