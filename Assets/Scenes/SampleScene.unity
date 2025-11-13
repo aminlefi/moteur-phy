@@ -426,7 +426,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1796077272
+--- !u!1 &1339971451
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -434,45 +434,51 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1796077274}
-  - component: {fileID: 1796077273}
+  - component: {fileID: 1339971453}
+  - component: {fileID: 1339971452}
   m_Layer: 0
-  m_Name: PhysicsManager
+  m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1796077273
+--- !u!114 &1339971452
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1796077272}
+  m_GameObject: {fileID: 1339971451}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d83c851850d4e8e48ad4c863312b8315, type: 3}
+  m_Script: {fileID: 11500000, guid: 27867621ce6657544bcba631447bd53d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoSetup: 1
-  cubePosition: {x: 0, y: 5, z: 0}
-  cubeSize: {x: 2, y: 2, z: 2}
-  cameraPosition: {x: 0, y: 3, z: -10}
-  cameraLookAt: {x: 0, y: 3, z: 0}
-  createFloor: 1
-  floorPosition: {x: 0, y: 0, z: 0}
-  floorSize: {x: 10, y: 0.1, z: 10}
---- !u!4 &1796077274
+  size: {x: 1, y: 1, z: 1}
+  subdivisions: 4
+  shardMass: 1
+  shardMaterial: {fileID: 0}
+  createGroundPlane: 1
+  groundPlaneSize: {x: 10, y: 1, z: 10}
+  groundMaterial: {fileID: 0}
+  autoGenerateOnPlay: 1
+  verticalOffset: 3
+  shardAlpha: 1
+  shardBounciness: 0.2
+  shardFriction: 0.6
+  initialAngularVelocity: 1
+  initialLinearJitter: 0.5
+--- !u!4 &1339971453
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1796077272}
+  m_GameObject: {fileID: 1339971451}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.040685177, y: 1.8120131, z: 0.40853262}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -485,4 +491,4 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 1796077274}
+  - {fileID: 1339971453}
