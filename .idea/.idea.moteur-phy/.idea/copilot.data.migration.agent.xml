@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AgentMigrationStateService">
+    <option name="migrationStatus" value="IN_PROGRESS" />
+    <option name="pendingSessionIds">
+      <option value="6dc1c6b1-4538-4dea-abb4-da921558f76d" />
+      <option value="76df8177-831f-4ec6-af20-675076b81287" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="6dc1c6b1-4538-4dea-abb4-da921558f76d">
+          <value>
+            <set>
+              <option value="253e80d4-6932-4b94-a239-3ed099c0d34e" />
+              <option value="520d7143-c85b-4da2-9fc0-4cd862073243" />
+              <option value="53cd8bcd-009e-4329-86cd-1ee561fd73e4" />
+              <option value="7b85639b-c3a8-4350-93b4-c1a90feefdb3" />
+            </set>
+          </value>
+        </entry>
+        <entry key="76df8177-831f-4ec6-af20-675076b81287">
+          <value>
+            <set>
+              <option value="ebf2b78f-5ee6-4ba6-9e47-da712e898847" />
+              <option value="7b82e339-3a17-445e-a9cc-d11016a7cdc9" />
+              <option value="b377ecde-dbad-4458-9b1b-d799989cedf2" />
+              <option value="baa674fb-ccf5-4447-b5fe-6461d888cd66" />
+              <option value="f40f7dc7-3d03-419f-b0a5-dc6922e6d5f1" />
+              <option value="223757ca-44cc-4316-9adc-fd804195c643" />
+              <option value="2669597f-228d-4334-aef2-cc5c90221d87" />
+              <option value="2b8dd0fa-ac2f-424f-97b4-fb71243a8e32" />
+            </set>
+          </value>
+        </entry>
+        <entry key="87fa5605-16a0-4183-b7fd-15ecf67d8e77">
+          <value>
+            <set>
+              <option value="c5222259-460c-4a34-9a09-ae53d9a05ad5" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="6dc1c6b1-4538-4dea-abb4-da921558f76d" />
+      <entry key="76df8177-831f-4ec6-af20-675076b81287">
+        <set>
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/HollowCubeFracture.cs" />
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/QuickStart.cs" />
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/HOLLOW_CUBE_FRACTURE.md" />
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/HOLLOW_CUBE_IMPLEMENTATION_SUMMARY.md" />
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/HOLLOW_CUBE_VISUAL_GUIDE.md" />
+          <option value="file://$PROJECT_DIR$/Assets/scripts/PhysicsEngine/HollowCubeFractureCustom.cs" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
+  </component>
+</project>
